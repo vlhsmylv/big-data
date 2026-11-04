@@ -196,6 +196,38 @@ nav.tabs .in{padding-right:340px}
 .mock .mq{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
 .mock .mq:first-of-type{border-top:0}
 .mockbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 50px);z-index:4;background:var(--bg);padding:8px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* cheat sheet */
+.cheat{columns:3 300px;column-gap:18px}
+.cs{break-inside:avoid;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 14px 6px;margin:0 0 14px}
+.cs h4{font:700 15px var(--display);margin:0 0 6px;padding-bottom:5px;border-bottom:2px solid var(--hl)}
+.cs ul{margin:0;padding-left:16px}
+.cs li{font-size:13.5px;line-height:1.45;margin:3px 0}
+.cs.traps{border-color:var(--bad);background:var(--bad-bg)}
+.cs.traps h4{border-bottom-color:var(--bad)}
+/* simulator */
+.sim-start .grid2{margin:12px 0}
+.simwrap{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:20px;align-items:start}
+.simside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);display:flex;flex-direction:column;gap:12px}
+.timer{font:700 26px var(--mono);text-align:center}
+.timer.low{color:var(--bad)}
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.palette button{font:600 13px var(--mono);aspect-ratio:1;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:3px;cursor:pointer;position:relative}
+.palette button.ans{background:var(--accent-bg);border-color:var(--accent)}
+.palette button.cur{outline:2px solid var(--ink)}
+.palette button.flag::after{content:"";position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--bad)}
+.palette button.ok{background:var(--good-bg);border-color:var(--good)} .palette button.no{background:var(--bad-bg);border-color:var(--bad)}
+.legend{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.simq .qtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:6px}
+.simq label.ch{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:3px;margin:6px 0;cursor:pointer;background:var(--panel)}
+.simq label.ch:hover{border-color:var(--accent)}
+.simq label.ch input{margin-top:4px;accent-color:var(--accent)}
+.simq label.ch.good{border-color:var(--good);background:var(--good-bg)} .simq label.ch.bad{border-color:var(--bad);background:var(--bad-bg)}
+.simnav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px}
+.rv{border-top:1px solid var(--line);padding:14px 0}
+.rv .yours{font-size:14px} .rv .right{font-size:14px;font-weight:700;color:var(--good)}
+.sumtab td:last-child,.sumtab th:last-child{text-align:right}
+@media (max-width:860px){.simwrap{grid-template-columns:minmax(0,1fr)}.simside{position:static;order:-1}.palette{grid-template-columns:repeat(11,1fr)}}
+@media (max-width:480px){.palette{grid-template-columns:repeat(7,1fr)}}
 /* ask claude */
 a.btn.askc{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--body);text-decoration:none;color:var(--accent);background:var(--accent-bg);border:1px solid transparent;border-radius:3px;padding:6px 11px;margin-top:10px}
 a.btn.askc:hover{border-color:var(--accent)}
@@ -322,7 +354,8 @@ details.deep{margin-top:18px}
   </header>
 
   <nav class="tabs" aria-label="Sections"><div class="in" role="tablist">
-    <button role="tab" data-tab="cram" aria-selected="false">Exam cram</button>
+    <button role="tab" data-tab="cram" aria-selected="false">Midterm simulator</button>
+    <button role="tab" data-tab="cheat" aria-selected="false">Cheat sheet</button>
     <button role="tab" data-tab="start" aria-selected="true">Course</button>
     <button role="tab" data-tab="past" aria-selected="false">Past exams</button>
     <button role="tab" data-tab="practice" aria-selected="false">Practice</button>
@@ -330,22 +363,131 @@ details.deep{margin-top:18px}
     <button role="tab" data-tab="yarn" aria-selected="false">Failure drills</button>
   </div></nav>
 
-  <!-- CRAM -->
+  <!-- SIMULATOR -->
   <section id="cram" role="tabpanel" hidden>
-    <div class="label">Exam day</div>
-    <h2>Exam cram: learn these by heart</h2>
-    <p class="lede">The midterm has 20 questions plus 1 bonus: <b>4 true/false, 9 multiple choice, 4 fill in the blank, 1 matching, 2 open-ended</b>. Below are the most likely questions in exactly those formats, with short answers. Ones marked "Past exam" or "Shown in class" have appeared before, so learn those first.</p>
-    <div class="panel stack">
-      <div class="row">
-        <button class="btn" id="cramHide" aria-pressed="false">Hide answers (test yourself)</button>
-        <button class="btn" id="cramCards">Flashcards</button>
-        <button class="btn primary" id="cramMock">Take a mock exam</button>
-      </div>
-      <div class="mut">With answers hidden, click a blurred answer to reveal it. Flashcards go through the section you pick, shuffled.</div>
+    <div id="simRoot"></div>
+  </section>
+
+  <!-- CHEAT SHEET -->
+  <section id="cheat" role="tabpanel" hidden>
+    <div class="label">Everything on one page</div>
+    <h2>Cheat sheet</h2>
+    <p class="lede">Every topic as one line. Read it top to bottom right before the exam.</p>
+    <div class="cheat">
+      <div class="cs"><h4>Big Data basics</h4><ul>
+        <li><b>Big Data</b> = too big, fast or messy for one computer, so many computers work together.</li>
+        <li><b>5 Vs</b>: Volume (how much), Velocity (how fast), Variety (how many kinds), Veracity (how trustworthy), Value (how useful).</li>
+        <li><b>Classic 3 Vs</b> = Volume, Velocity, Variety. Value and Veracity were added later.</li>
+        <li><b>Throughput</b> = data processed per unit of time. <b>Latency</b> = wait for one answer.</li>
+        <li><b>Structured</b> = tables; <b>semi-structured</b> = CSV, XML, JSON; <b>unstructured</b> = images, audio, video, text.</li>
+        <li><b>Schema-on-write</b> = define table first (databases). <b>Schema-on-read</b> = store raw, structure when reading (Hadoop, NoSQL).</li>
+        <li><b>Data-driven</b> = decide from evidence in data, not gut feeling.</li>
+        <li>Discount example: send to users who spent long but didn't buy (User 1 and 3).</li>
+      </ul></div>
+      <div class="cs"><h4>Data science</h4><ul>
+        <li><b>DIKW</b>: Data → Information (what) → Knowledge (why) → Wisdom (right action).</li>
+        <li><b>Analytics</b>: Descriptive (what happened), Diagnostic (why), Predictive (what will), Prescriptive (what to do).</li>
+        <li><b>Lifecycle</b>: business understanding, data understanding, preparation, modeling, evaluation, deployment (loops).</li>
+        <li>Most time (about 38%) goes to cleaning and preparing data.</li>
+        <li><b>Scientist</b> predicts with models; <b>engineer</b> builds pipelines; <b>analyst</b> explains the past; <b>ML engineer</b> deploys models.</li>
+        <li><b>ETL</b> = transform before load; <b>ELT</b> = load raw, transform later.</li>
+        <li>Use cases: fraud (banks), recommendations (retail), predictive maintenance (factories), churn (telecom).</li>
+      </ul></div>
+      <div class="cs"><h4>Scaling and Hadoop</h4><ul>
+        <li><b>Scale-up</b> = one bigger machine. <b>Scale-out</b> = more cheap machines. Hadoop scales out.</li>
+        <li><b>Shared-nothing</b>: each node has its own CPU, RAM and disk.</li>
+        <li><b>Commodity hardware</b>: cheap machines; failures are normal and handled automatically.</li>
+        <li><b>Hadoop</b> = HDFS (storage) + MapReduce (processing) + YARN (resources).</li>
+        <li>Master-slave architecture. <b>Move computation to the data</b> (data locality).</li>
+        <li>Design principles: automatic parallelization, fault tolerance, many cheap machines, simple abstraction.</li>
+      </ul></div>
+      <div class="cs"><h4>HDFS</h4><ul>
+        <li><b>Block</b> = 128 MB (Hadoop 2; 64 MB in Hadoop 1). Blocks = size ÷ 128, round UP.</li>
+        <li>129 MB = 2 · 130 MB = 2 · 266 MB = 3 · 512 MB = 4 · 700 MB = 6. Last block uses only its real size.</li>
+        <li><b>NameNode</b> = metadata only (namespace, file → blocks → DataNodes). Never touches data.</li>
+        <li><b>DataNode</b> = stores actual blocks. Heartbeat every <b>3 s</b>, block report every <b>6 h</b>.</li>
+        <li><b>Replication factor 3</b> = fault tolerance. Never two copies on one node.</li>
+        <li><b>Rack awareness</b>: copy 1 on writer's node, copy 2 on another rack, copy 3 another node in that rack.</li>
+        <li><b>Write</b>: ask NameNode → pipeline client → DN1 → DN2 → DN3 (64 kB packets) → acks back.</li>
+        <li><b>Read</b>: ask NameNode for locations → read directly from nearest DataNode.</li>
+        <li>DataNode dies → NameNode re-replicates its blocks from the other copies. No data loss.</li>
+        <li>Good for: large files, write-once-read-many, throughput. Bad for: small files, low latency, many writes.</li>
+      </ul></div>
+      <div class="cs"><h4>NameNode failure</h4><ul>
+        <li>NameNode = <b>single point of failure</b> (Hadoop 1).</li>
+        <li><b>fsimage</b> = snapshot of metadata (good for bulk writes; don't write a rename to it).</li>
+        <li><b>edits log</b> = small incremental changes (a rename goes here).</li>
+        <li><b>Checkpointing</b> = merge fsimage + edits into new fsimage, empty the log. Purpose: fast restart.</li>
+        <li><b>Secondary NameNode</b> makes checkpoints. It is NOT a backup.</li>
+        <li><b>HA</b> (Hadoop 2): Active + Standby NameNode, ZooKeeper handles failover. <b>Federation</b> = several NameNodes.</li>
+      </ul></div>
+      <div class="cs"><h4>MapReduce</h4><ul>
+        <li><b>Map</b> → <b>Shuffle &amp; sort</b> → <b>Reduce</b>, all as (key, value) pairs.</li>
+        <li><b>1 split = 1 map task</b> (usually 1 split = 1 block).</li>
+        <li><b>Map output</b> is stored on the mapper's <b>local disk</b>, NOT HDFS.</li>
+        <li><b>Shuffle &amp; sort</b> purpose: group all values for the same key before reduce.</li>
+        <li><b>Reduce</b>: aggregate each key's list. One output file per reducer in HDFS.</li>
+        <li><b>Partition</b>: reducer = hash(key) % number_of_reducers.</li>
+        <li><b>Combiner</b> = mini-reduce on mapper side, less network traffic. Only for sum/count/max (not average directly).</li>
+        <li>No "combine task" or "combine phase": it runs inside the map task.</li>
+        <li><b>Pull scheduling</b>: workers ask for tasks (pull = TRUE, push = FALSE).</li>
+        <li><b>Speculative execution</b>: backup copy of a slow (straggler) task; first to finish wins.</li>
+        <li>Map worker fails → its completed AND in-progress map tasks re-run (output was on its disk).</li>
+      </ul></div>
+      <div class="cs"><h4>The trace recipe (45 pts)</h4><ul>
+        <li>1. Blocks = size ÷ block size; place copies, never twice on a node.</li>
+        <li>2. Node fails → run the map on a live node with a copy (data locality).</li>
+        <li>3. Map: every word → (word, length) or (word, 1); repeats give repeat pairs.</li>
+        <li>4. Partition: hash % R per word, then split each mapper's pairs.</li>
+        <li>5. Shuffle: collect each reducer's keys from all mappers, alphabetical, as lists.</li>
+        <li>6. Reduce: add each list. Check every sum.</li>
+        <li>Pseudocode: <code>map: emit(key, value)</code> · <code>reduce(key, values): emit(key, sum/max/avg)</code>.</li>
+      </ul></div>
+      <div class="cs"><h4>YARN</h4><ul>
+        <li><b>ResourceManager</b>: one per cluster, allocates resources; its <b>Scheduler</b> picks nodes; does job scheduling.</li>
+        <li><b>NodeManager</b>: one per node, <b>launches containers</b>, monitors usage, heartbeats to RM.</li>
+        <li><b>ApplicationMaster</b>: one per application, negotiates containers with RM, monitors and restarts tasks.</li>
+        <li><b>Container</b> = unit of CPU + memory.</li>
+        <li><b>Hadoop 1</b>: JobTracker (scheduling + monitoring, single point of failure) + TaskTrackers with fixed slots.</li>
+        <li>YARN split JobTracker → RM (resources) + AM (per job). TaskTracker → NodeManager. Runs Spark too.</li>
+        <li>Container request: received by <b>RM</b>, placed by <b>RM Scheduler</b>, launched by <b>NM</b>.</li>
+      </ul></div>
+      <div class="cs"><h4>Failures and locality</h4><ul>
+        <li>AM node dies → <b>RM</b> restarts the AM on another node.</li>
+        <li>Worker dies → detected by <b>missed heartbeats</b> → <b>AM</b> re-runs its tasks on healthy nodes.</li>
+        <li>Survives one NM failing: work spread out, data replicated, tasks re-run elsewhere.</li>
+        <li><b>Locality order</b>: node-local → rack-local → off-rack. Don't run on a node without the block.</li>
+        <li><b>Delay scheduling</b>: wait briefly for a local slot before going off-node.</li>
+        <li>RM dies → no new containers; fix with RM HA (Active/Standby + ZooKeeper).</li>
+      </ul></div>
+      <div class="cs"><h4>Schedulers</h4><ul>
+        <li><b>FIFO</b>: arrival order; big jobs block small ones.</li>
+        <li><b>Capacity</b>: queues with guaranteed %, FIFO inside each queue (40% of a 20% queue = 8%).</li>
+        <li><b>Fair</b>: equal share for all running jobs over time.</li>
+        <li><b>DRF</b>: equal share of each user's dominant resource. Alice 20 containers (60% memory), Bob 10 (60% CPU).</li>
+      </ul></div>
+      <div class="cs"><h4>Ecosystem</h4><ul>
+        <li><b>HBase</b>: NoSQL wide-column DB on HDFS, fast random reads/writes by row key (like BigTable).</li>
+        <li>HBase: table → regions → column families (fixed) → columns (added anytime); Get, Put, Delete, Scan.</li>
+        <li>HBase writes: WAL + MemStore → flushed to HFiles in HDFS; compaction merges files.</li>
+        <li><b>Hive</b> = SQL on Hadoop · <b>Pig</b> = Pig Latin scripts · <b>ZooKeeper</b> = coordination, failover.</li>
+        <li><b>Sqoop</b> = SQL DB import/export · <b>Flume</b> = streaming logs · <b>Oozie</b> = workflow scheduler.</li>
+        <li><b>Ambari</b> = cluster management · <b>Lucene</b> = search library · <b>Solr</b> = built using Lucene.</li>
+        <li><b>Spark</b> = fast in-memory engine · <b>PySpark</b> = Python API for Spark.</li>
+        <li>Lab: <code>hdfs dfs -mkdir / -put / -ls / -cat</code>, <code>hadoop jar ... wordcount in out</code> (out must not exist).</li>
+      </ul></div>
+      <div class="cs traps"><h4>Traps (always FALSE)</h4><ul>
+        <li>"NameNode stores the data" / "DataNode stores metadata".</li>
+        <li>"Map output goes to HDFS".</li>
+        <li>"Secondary NameNode is a backup".</li>
+        <li>"HDFS is good for small files / low latency".</li>
+        <li>"Big Data uses one powerful server / shared disk".</li>
+        <li>"One ApplicationMaster per cluster" (it's per application).</li>
+        <li>"Velocity = slow", "Value = storage capacity".</li>
+        <li>"MapReduce uses push scheduling".</li>
+        <li>"Shuffle sends data randomly".</li>
+      </ul></div>
     </div>
-    <div id="cramFlash" class="panel" style="margin-top:14px" hidden></div>
-    <div id="cramMockBox" class="mock" hidden></div>
-    <div id="cramLists"></div>
   </section>
 
   <!-- COURSE -->
@@ -1871,43 +2013,89 @@ bonus: [
 ]
 };
 
-/* ---------- exam cram ---------- */
+/* ---------- midterm simulator ---------- */
 (function(){
-const C=window.CRAM, lists=document.getElementById('cramLists');
-const SECS=[['tf','True / False','4 on the exam'],['mcq','Multiple choice','9 on the exam'],['fill','Fill in the blank','4 on the exam'],['match','Matching','1 on the exam'],['open','Open-ended','2 on the exam'],['bonus','Bonus candidates','1 bonus']];
-const src=x=>x?`<span class="src">${esc(x)}</span>`:'';
-function rows(k){const a=C[k];
- if(k==='tf')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2]&&/Past|Pop|class|Fall|Spring/.test(r[2])?r[2].split('.').pop().trim():'')}</div><div class="ca ${r[1]?'T':'F'}">${r[1]?'TRUE':'FALSE'}${r[2]&&!/^(Past exam|Pop quiz|Shown in class)$/.test(r[2])?' <span class="why2">· '+esc(r[2].replace(/\.? ?(Past exam|Pop quiz|Shown in class)$/,''))+'</span>':''}</div></div></div>`).join('');
- if(k==='mcq')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2])}</div><div class="ca">${esc(r[1])}</div></div></div>`).join('');
- if(k==='fill')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2])}</div><div class="ca">${esc(r[1])}</div></div></div>`).join('');
- if(k==='match')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq"><b>${esc(r[0])}</b>${src(r[2])}</div><div class="mtab">${r[1].map(p=>`<span>${esc(p[0])}</span><span>${esc(p[1])}</span>`).join('')}</div></div></div>`).join('');
- return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq"><b>${esc(r[0])}</b>${src(r[2])}</div><div class="ca" style="font-weight:400;color:var(--ink)">${esc(r[1])}</div></div></div>`).join('');}
-lists.innerHTML='<nav class="cramnav" aria-label="Formats">'+SECS.map(([k,t])=>`<a href="#c_${k}" data-jump="${k}">${t} · ${C[k].length}</a>`).join('')+'</nav>'+
- SECS.map(([k,t,n])=>`<div class="cramsec" id="c_${k}"><div class="shead"><h3>${t}</h3><span class="mut">${n} · ${C[k].length} to learn</span></div>${rows(k)}</div>`).join('');
-lists.querySelectorAll('[data-jump]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById('c_'+a.dataset.jump).scrollIntoView({behavior:'smooth'})});
-const hb=document.getElementById('cramHide');
-hb.onclick=()=>{const on=!lists.classList.contains('hideans');lists.classList.toggle('hideans',on);hb.setAttribute('aria-pressed',on);hb.textContent=on?'Show all answers':'Hide answers (test yourself)';lists.querySelectorAll('.shown').forEach(x=>x.classList.remove('shown'))};
-lists.addEventListener('click',e=>{if(!lists.classList.contains('hideans'))return;const a=e.target.closest('.ca,.mtab');if(a)a.classList.toggle('shown')});
-/* flashcards */
-const fb=document.getElementById('cramFlash');let deck=[],fi=0,again=[];
-function card(k,r){if(k==='tf')return[r[0],r[1]?'TRUE':'FALSE'];if(k==='match')return['Match: '+r[0]+'\n'+r[1].map(p=>p[0]).join(' · '),r[1].map(p=>p[0]+' = '+p[1]).join('\n')];return[r[0],r[1]]}
-function startDeck(k){deck=shuffle(C[k].map(r=>card(k,r)));fi=0;again=[];showCard()}
-function showCard(flip){if(fi>=deck.length){if(again.length){deck=shuffle(again);again=[];fi=0}else{fb.innerHTML='<p><b>Deck done.</b> Pick another section or close.</p>'+pickRow();wirePick();return}}
- const [q,a]=deck[fi];fb.innerHTML=`<div class="label">Card ${fi+1} of ${deck.length}${again.length?' · '+again.length+' to repeat':''}</div><div class="fcard"><div style="white-space:pre-line">${esc(q)}</div>${flip?`<div class="fa">${esc(a)}</div>`:''}</div><div class="row" style="justify-content:center">${flip?'<button class="btn" id="fAgain">Again</button><button class="btn primary" id="fKnew">I knew it</button>':'<button class="btn primary" id="fFlip">Show answer</button>'}<button class="btn" id="fClose">Close</button></div>`;
- const g=id=>document.getElementById(id);if(g('fFlip'))g('fFlip').onclick=()=>showCard(true);if(g('fKnew'))g('fKnew').onclick=()=>{fi++;showCard()};if(g('fAgain'))g('fAgain').onclick=()=>{again.push(deck[fi]);fi++;showCard()};g('fClose').onclick=()=>{fb.hidden=true}}
-const pickRow=()=>'<div class="row" style="margin-top:10px">'+SECS.filter(s=>s[0]!=='bonus').map(([k,t])=>`<button class="btn" data-deck="${k}">${t}</button>`).join('')+'<button class="btn" id="fClose2">Close</button></div>';
-function wirePick(){fb.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>startDeck(b.dataset.deck));const c=document.getElementById('fClose2');if(c)c.onclick=()=>{fb.hidden=true}}
-document.getElementById('cramCards').onclick=()=>{document.getElementById('cramMockBox').hidden=true;fb.hidden=false;fb.innerHTML='<p><b>Which section?</b></p>'+pickRow();wirePick();fb.scrollIntoView({behavior:'smooth',block:'center'})};
-/* mock exam in the real format */
-const mb=document.getElementById('cramMockBox');
-function pick(t,n,ex){return shuffle(BANK.filter(q=>q.t===t&&!ex.has(q.id))).slice(0,n)}
-document.getElementById('cramMock').onclick=()=>{fb.hidden=true;const ex=new Set();const take=(t,n)=>{const r=pick(t,n,ex);r.forEach(q=>ex.add(q.id));return r};
- const parts=[['True / False',take('tf',4)],['Multiple choice',take('mcq',9)],['Fill in the blank',take('fill',4)],['Matching',take('match',1)],['Open-ended',take('open',2)],['Bonus',take('multi',1)]];
- const total=parts.reduce((a,p)=>a+p[1].length,0);let done=0,right=0;
- mb.hidden=false;mb.innerHTML=`<div class="mockbar"><b>Mock exam</b><span class="score" id="mockScore">0 / ${total} answered</span><button class="btn" id="mockNew">New mock</button><button class="btn" id="mockClose">Close</button></div>`+parts.map(([t,qs])=>`<h3>${t} <span class="mut" style="font-size:14px">(${qs.length})</span></h3>`+qs.map((q,i)=>`<div class="panel mq" data-p="${t}" data-i="${i}" style="margin-bottom:10px"></div>`).join('')).join('');
- parts.forEach(([t,qs])=>qs.forEach((q,i)=>{const host=mb.querySelector(`.mq[data-p="${t}"][data-i="${i}"]`);window.inlineQ(host,q,ok=>{done++;if(ok)right++;document.getElementById('mockScore').textContent=`${done} / ${total} answered · ${right} correct`+(done===total?` · ${Math.round(100*right/total)}%`:'')})}));
- document.getElementById('mockNew').onclick=()=>document.getElementById('cramMock').click();document.getElementById('mockClose').onclick=()=>{mb.hidden=true};
- mb.scrollIntoView({behavior:'smooth'})};
+const root=document.getElementById('simRoot'), C=window.CRAM||{};
+const FORMAT=[['tf','True / False',4],['mcq','Multiple choice',9],['fill','Fill in the blank',4],['match','Matching',1],['open','Open-ended',2],['bonus','Bonus',1]];
+const norm=v=>String(v).trim().toLowerCase().replace(/[.\s]+$/,'').replace(/\s+/g,' ');
+/* question pools: practice bank + cram sets, past-exam / class questions first */
+const prio=q=>/Past exam|Pop quiz|Shown in class|Fall 20|Fall 25|Spring/i.test((q.w||'')+' '+(q.src||''))?0:1;
+function pool(t){let p=BANK.filter(q=>q.t===t);
+ if(t==='tf')p=p.concat((C.tf||[]).map((r,i)=>({id:'ct'+i,t:'tf',q:r[0],a:r[1],w:r[2]||'',src:r[2]})));
+ if(t==='fill')p=p.concat((C.fill||[]).map((r,i)=>({id:'cf'+i,t:'fill',q:r[0],a:[norm(r[1])],w:r[2]||'',src:r[2]})));
+ if(t==='match')p=p.concat((C.match||[]).map((r,i)=>({id:'cm'+i,t:'match',q:'Match: '+r[0],pairs:r[1].slice(0,6),extra:[],w:r[2]||'',src:r[2]})));
+ if(t==='open')p=p.concat((C.open||[]).map((r,i)=>({id:'co'+i,t:'open',q:r[0],m:r[1],w:r[2]||'',src:r[2]})));
+ const seen=new Set();return p.filter(q=>{const k=norm(q.q);if(seen.has(k))return false;seen.add(k);return true})}
+function draw(t,n){const p=pool(t),hi=shuffle(p.filter(q=>prio(q)===0)),lo=shuffle(p.filter(q=>prio(q)===1));
+ const nh=Math.min(hi.length,Math.ceil(n*0.6));return shuffle(hi.slice(0,nh).concat(lo).slice(0,n).concat(hi.slice(nh)).slice(0,n))}
+let X=null,tick=null;
+function startScreen(){clearInterval(tick);root.innerHTML=`<div class="sim-start"><div class="label">Exam mode</div><h2>Midterm simulator</h2>
+ <p class="lede">A full practice midterm in the real format: <b>4 true/false, 9 multiple choice, 4 fill in the blank, 1 matching, 2 open-ended, plus 1 bonus</b>. No answers are shown until you submit, like on Blackboard. Each attempt draws new questions, weighted toward ones that appeared on past exams or in class.</p>
+ <div class="grid2"><div class="panel"><div class="label" style="margin-bottom:6px">Timer</div><select class="sel" id="simTime"><option value="60">60 minutes</option><option value="45">45 minutes</option><option value="90">90 minutes</option><option value="0">No timer</option></select><p class="mut" style="margin:.5em 0 0">The real duration hasn't been announced. When time runs out, the exam submits itself.</p></div>
+ <div class="panel"><div class="label" style="margin-bottom:6px">How it works</div><ul style="margin:0;padding-left:18px"><li>Move between questions with Next / Previous or the numbers.</li><li>Flag questions to come back to.</li><li>Submit to see your score and every correct answer.</li></ul></div></div>
+ <button class="btn primary" id="simGo" style="font-size:16px;padding:10px 20px">Start the exam</button>${X&&X.done?' <button class="btn" id="simLast">See last result</button>':''}</div>`;
+ document.getElementById('simGo').onclick=()=>begin(+document.getElementById('simTime').value);
+ const l=document.getElementById('simLast');if(l)l.onclick=review}
+function begin(mins){const qs=[];FORMAT.forEach(([k,t,n])=>{const src=k==='bonus'?(pool('multi').length?'multi':'open'):k;draw(src,n).forEach(q=>qs.push({q,sec:t,bonus:k==='bonus'}))});
+ X={qs,ans:qs.map(()=>null),flag:qs.map(()=>false),cur:0,end:mins?Date.now()+mins*60000:0,done:false,self:{}};
+ if(mins){tick=setInterval(()=>{const left=X.end-Date.now();const el=document.getElementById('simTimer');if(left<=0){clearInterval(tick);submit(true);return}if(el){const m=Math.floor(left/60000),s2=Math.floor(left%60000/1000);el.textContent=m+':'+String(s2).padStart(2,'0');el.classList.toggle('low',left<5*60000)}},500)}
+ exam()}
+function body(it,i,locked){const q=it.q,a=X.ans[i],name='sq'+i;
+ if(q.t==='tf')return ['True','False'].map((l,k)=>`<label class="ch"><input type="radio" name="${name}" value="${k===0}" ${a===(k===0)?'checked':''} ${locked?'disabled':''}><span>${l}</span></label>`).join('');
+ if(q.t==='mcq')return q.o.map((o,k)=>`<label class="ch"><input type="radio" name="${name}" value="${k}" ${a===k?'checked':''} ${locked?'disabled':''}><span>${esc(o)}</span></label>`).join('');
+ if(q.t==='multi')return q.o.map((o,k)=>`<label class="ch"><input type="checkbox" value="${k}" ${a&&a.includes(k)?'checked':''} ${locked?'disabled':''}><span>${esc(o)}</span></label>`).join('');
+ if(q.t==='fill')return `<input class="fill" id="sfill" value="${esc(a||'')}" placeholder="Your answer" autocomplete="off" ${locked?'disabled':''}>`;
+ if(q.t==='match'){if(!it.opts)it.opts=shuffle(q.pairs.map(p=>p[1]).concat(q.extra||[]));return `<div class="stack">${q.pairs.map((p,k)=>`<div class="check" style="justify-content:space-between"><span style="flex:1 1 220px">${esc(p[0])}</span><select class="sel" data-k="${k}" ${locked?'disabled':''} aria-label="Match for ${esc(p[0])}"><option value="">Choose</option>${it.opts.map(x=>`<option ${a&&a[k]===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div>`).join('')}</div>`}
+ return `<textarea id="sopen" placeholder="Write your answer as you would in the exam" ${locked?'disabled':''}>${esc(a||'')}</textarea>`}
+function capture(){const i=X.cur,it=X.qs[i],q=it.q,box=document.getElementById('simQ');if(!box)return;
+ if(q.t==='tf'){const r=box.querySelector('input:checked');X.ans[i]=r?r.value==='true':null}
+ else if(q.t==='mcq'){const r=box.querySelector('input:checked');X.ans[i]=r?+r.value:null}
+ else if(q.t==='multi'){const v=[...box.querySelectorAll('input:checked')].map(x=>+x.value);X.ans[i]=v.length?v:null}
+ else if(q.t==='fill'){const v=box.querySelector('#sfill').value.trim();X.ans[i]=v||null}
+ else if(q.t==='match'){const v=[...box.querySelectorAll('select')].map(x=>x.value);X.ans[i]=v.some(Boolean)?v:null}
+ else{const v=box.querySelector('#sopen').value.trim();X.ans[i]=v||null}}
+function answered(i){const a=X.ans[i];return a!==null&&a!==undefined&&!(Array.isArray(a)&&!a.some(x=>x!==''&&x!==null))}
+function exam(){const i=X.cur,it=X.qs[i],n=X.qs.length,cnt=X.ans.filter((_,k)=>answered(k)).length;
+ root.innerHTML=`<div class="simwrap"><div class="panel simq" id="simQ"><div class="qtop"><span class="label">Question ${i+1} of ${n}${it.bonus?' · Bonus':''} · ${esc(it.sec)}</span><button class="btn" id="simFlag" aria-pressed="${X.flag[i]}">${X.flag[i]?'Flagged':'Flag for review'}</button></div><div class="qtext">${esc(it.q.q)}</div>${it.q.t==='multi'?'<p class="mut" style="margin-top:-6px">Select all that apply.</p>':''}${body(it,i,false)}
+ <div class="simnav"><button class="btn" id="simPrev" ${i===0?'disabled':''}>← Previous</button>${i<n-1?'<button class="btn primary" id="simNext">Next →</button>':'<button class="btn primary" id="simEnd">Finish and submit</button>'}</div></div>
+ <aside class="simside"><div class="panel">${X.end?'<div class="label" style="text-align:center">Time left</div><div class="timer" id="simTimer">--:--</div>':'<div class="label" style="text-align:center">No timer</div>'}</div>
+ <div class="panel"><div class="label" style="margin-bottom:8px">${cnt} of ${n} answered</div><div class="palette">${X.qs.map((_,k)=>`<button data-go="${k}" class="${answered(k)?'ans':''} ${k===i?'cur':''} ${X.flag[k]?'flag':''}" aria-label="Question ${k+1}">${k+1}</button>`).join('')}</div>
+ <div class="legend" style="margin-top:10px"><span>Filled = answered · red dot = flagged</span></div></div>
+ <button class="btn" id="simSubmit">Submit exam</button><div id="simConfirm" class="why" hidden></div></aside></div>`;
+ const g=id=>document.getElementById(id),go=k=>{capture();X.cur=k;exam();g('simQ').scrollIntoView({block:'nearest'})};
+ if(g('simPrev'))g('simPrev').onclick=()=>go(i-1);if(g('simNext'))g('simNext').onclick=()=>go(i+1);
+ g('simFlag').onclick=()=>{capture();X.flag[i]=!X.flag[i];exam()};
+ root.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+ g('simQ').addEventListener('change',()=>{capture();const b=root.querySelector(`[data-go="${i}"]`);if(b)b.classList.toggle('ans',answered(i))});
+ const fi=g('sfill');if(fi)fi.addEventListener('keydown',e=>{if(e.key==='Enter'&&g('simNext'))g('simNext').click()});
+ const ask=()=>{capture();const left=X.qs.length-X.ans.filter((_,k)=>answered(k)).length;const c=g('simConfirm');c.hidden=false;c.innerHTML=`${left?`<b>${left} unanswered.</b> `:''}Submit now? You can't change answers after.<div class="row" style="margin-top:8px"><button class="btn primary" id="simYes">Submit</button><button class="btn" id="simNo">Keep working</button></div>`;g('simYes').onclick=()=>submit(false);g('simNo').onclick=()=>{c.hidden=true}};
+ g('simSubmit').onclick=ask;if(g('simEnd'))g('simEnd').onclick=ask;
+ if(X.end){const el=g('simTimer'),left=X.end-Date.now();if(el&&left>0){el.textContent=Math.floor(left/60000)+':'+String(Math.floor(left%60000/1000)).padStart(2,'0')}}}
+function grade(it,a){const q=it.q;if(a===null||a===undefined)return q.t==='open'?null:false;
+ if(q.t==='tf')return a===q.a;if(q.t==='mcq')return a===q.a;if(q.t==='multi')return a.length===q.a.length&&a.every(k=>q.a.includes(k));
+ if(q.t==='fill')return q.a.some(x=>norm(x)===norm(a));if(q.t==='match')return q.pairs.every((p,k)=>a[k]===p[1]);return null}
+function right(q){if(q.t==='tf')return q.a?'True':'False';if(q.t==='mcq')return q.o[q.a];if(q.t==='multi')return q.a.map(k=>q.o[k]).join('; ');if(q.t==='fill')return q.a[0];if(q.t==='match')return q.pairs.map(p=>p[0]+' = '+p[1]).join('\n');return q.m||''}
+function yours(q,a){if(a===null||a===undefined)return 'No answer';if(q.t==='tf')return a?'True':'False';if(q.t==='mcq')return q.o[a];if(q.t==='multi')return a.map(k=>q.o[k]).join('; ');if(q.t==='match')return q.pairs.map((p,k)=>p[0]+' = '+(a[k]||'?')).join('\n');return String(a)}
+function submit(timeUp){capture();clearInterval(tick);X.done=true;X.timeUp=timeUp;X.res=X.qs.map((it,i)=>grade(it,X.ans[i]));
+ X.qs.forEach((it,i)=>{if(it.q.id&&X.res[i]!==null){stats[it.q.id]={miss:!X.res[i],n:((stats[it.q.id]&&stats[it.q.id].n)||0)+1}}});saveStats();review()}
+function review(){const n=X.qs.length,main=X.qs.map((it,i)=>i).filter(i=>!X.qs[i].bonus);
+ const score=i=>X.res[i]===null?(X.self[i]===true?1:0):X.res[i]?1:0;
+ const got=main.reduce((s2,i)=>s2+score(i),0),bon=X.qs.map((it,i)=>i).filter(i=>X.qs[i].bonus).reduce((s2,i)=>s2+score(i),0),pend=X.qs.filter((it,i)=>X.res[i]===null&&X.self[i]===undefined).length;
+ const bySec=FORMAT.map(([k,t])=>{const ids=X.qs.map((it,i)=>i).filter(i=>X.qs[i].sec===t);return `<tr><td>${t}</td><td>${ids.reduce((s2,i)=>s2+score(i),0)} / ${ids.length}</td></tr>`}).join('');
+ root.innerHTML=`<div class="label">Result${X.timeUp?' · time ran out':''}</div><h2>${got} / ${main.length} <span class="mut" style="font-size:18px">(${Math.round(100*got/main.length)}%)${bon?' + bonus':''}</span></h2>
+ ${pend?`<p class="lede">${pend} open-ended answer${pend>1?'s':''} still to self-mark below: compare with the model answer and press "I got it" or "I missed it".</p>`:''}
+ <div class="grid2"><div class="panel"><div class="tablewrap"><table class="sumtab"><tr><th>Section</th><th>Score</th></tr>${bySec}</table></div></div>
+ <div class="panel stack"><button class="btn primary" id="simAgain">New exam</button><button class="btn" id="simWrong">Show only my mistakes</button><button class="btn" id="simAll" hidden>Show all questions</button></div></div>
+ <div id="rvList" style="margin-top:14px">${X.qs.map((it,i)=>{const r=X.res[i],q=it.q,st=r===null?(X.self[i]===undefined?'open':X.self[i]?'ok':'no'):r?'ok':'no';
+ return `<div class="rv" data-st="${st}"><div class="label">${i+1}. ${esc(it.sec)}${it.bonus?' · Bonus':''} · <span class="verdict ${st==='ok'?'ok':st==='no'?'no':''}">${st==='ok'?'Correct':st==='no'?'Wrong':'Self-mark'}</span></div><div class="qtext" style="font-size:16px;margin:6px 0">${esc(q.q)}</div>
+ <div class="yours">Your answer: ${esc(yours(q,X.ans[i])).replace(/\n/g,'<br>')}</div><div class="right">${q.t==='open'?'Model answer':'Correct answer'}: ${esc(right(q)).replace(/\n/g,'<br>')}</div>${q.w&&q.t!=='open'?`<div class="mut" style="font-size:13px;margin-top:4px">${esc(q.w)}</div>`:''}
+ ${st==='open'?`<div class="row" style="margin-top:8px"><button class="btn" data-self="${i}" data-v="1">I got it</button><button class="btn" data-self="${i}" data-v="0">I missed it</button></div>`:''}${st!=='ok'?askLink(qPrompt(q),'Ask Claude why'):''}</div>`}).join('')}</div>`;
+ const g=id=>document.getElementById(id);g('simAgain').onclick=startScreen;
+ g('simWrong').onclick=()=>{root.querySelectorAll('.rv').forEach(r=>r.hidden=r.dataset.st==='ok');g('simWrong').hidden=true;g('simAll').hidden=false};
+ g('simAll').onclick=()=>{root.querySelectorAll('.rv').forEach(r=>r.hidden=false);g('simAll').hidden=true;g('simWrong').hidden=false};
+ root.querySelectorAll('[data-self]').forEach(b=>b.onclick=()=>{X.self[+b.dataset.self]=b.dataset.v==='1';review()});
+ window.scrollTo({top:root.getBoundingClientRect().top+window.scrollY-70})}
+startScreen();
 })();
 </script>
 
