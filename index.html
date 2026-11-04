@@ -173,6 +173,29 @@ nav.tabs .in{padding-right:340px}
 
 .also{border:1px solid var(--line);border-radius:4px;padding:4px 16px 12px;margin:10px 0;background:var(--panel)}
 .also h4{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* cram */
+.cramnav{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 16px}
+.cramnav a{font:600 13px var(--body);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px}
+.cramnav a:hover{border-color:var(--accent)}
+.cramsec{margin-top:26px;scroll-margin-top:70px}
+.cramsec .shead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:2px solid var(--hl);padding-bottom:6px;margin-bottom:10px}
+.cramsec .shead h3{margin:0}
+.crow{display:grid;grid-template-columns:28px minmax(0,1fr);gap:6px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.crow .n{font:600 12px var(--mono);color:var(--muted);padding-top:3px}
+.crow .cq{font-weight:400}
+.crow .ca{font-weight:700;color:var(--accent);margin-top:3px;white-space:pre-line}
+.crow .ca.T{color:var(--good)} .crow .ca.F{color:var(--bad)}
+.crow .src{font:11px var(--mono);color:var(--muted);margin-left:6px;font-weight:400}
+.crow .why2{font-size:13px;color:var(--muted);font-weight:400}
+.mtab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2px 14px;margin-top:4px}
+.mtab span:nth-child(odd){color:var(--ink)} .mtab span:nth-child(even){font-weight:700;color:var(--accent)}
+.hideans .ca,.hideans .mtab span:nth-child(even){filter:blur(6px);cursor:pointer;user-select:none}
+.hideans .ca.shown,.hideans .mtab.shown span:nth-child(even){filter:none}
+.fcard{min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:14px;text-align:center;padding:28px 20px;font-size:19px}
+.fcard .fa{font-weight:700;color:var(--accent);white-space:pre-line;font-size:17px}
+.mock .mq{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.mock .mq:first-of-type{border-top:0}
+.mockbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 50px);z-index:4;background:var(--bg);padding:8px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 /* ask claude */
 a.btn.askc{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--body);text-decoration:none;color:var(--accent);background:var(--accent-bg);border:1px solid transparent;border-radius:3px;padding:6px 11px;margin-top:10px}
 a.btn.askc:hover{border-color:var(--accent)}
@@ -299,12 +322,31 @@ details.deep{margin-top:18px}
   </header>
 
   <nav class="tabs" aria-label="Sections"><div class="in" role="tablist">
+    <button role="tab" data-tab="cram" aria-selected="false">Exam cram</button>
     <button role="tab" data-tab="start" aria-selected="true">Course</button>
     <button role="tab" data-tab="past" aria-selected="false">Past exams</button>
     <button role="tab" data-tab="practice" aria-selected="false">Practice</button>
     <button role="tab" data-tab="lab" aria-selected="false">MapReduce lab</button>
     <button role="tab" data-tab="yarn" aria-selected="false">Failure drills</button>
   </div></nav>
+
+  <!-- CRAM -->
+  <section id="cram" role="tabpanel" hidden>
+    <div class="label">Exam day</div>
+    <h2>Exam cram: learn these by heart</h2>
+    <p class="lede">The midterm has 20 questions plus 1 bonus: <b>4 true/false, 9 multiple choice, 4 fill in the blank, 1 matching, 2 open-ended</b>. Below are the most likely questions in exactly those formats, with short answers. Ones marked "Past exam" or "Shown in class" have appeared before, so learn those first.</p>
+    <div class="panel stack">
+      <div class="row">
+        <button class="btn" id="cramHide" aria-pressed="false">Hide answers (test yourself)</button>
+        <button class="btn" id="cramCards">Flashcards</button>
+        <button class="btn primary" id="cramMock">Take a mock exam</button>
+      </div>
+      <div class="mut">With answers hidden, click a blurred answer to reveal it. Flashcards go through the section you pick, shuffled.</div>
+    </div>
+    <div id="cramFlash" class="panel" style="margin-top:14px" hidden></div>
+    <div id="cramMockBox" class="mock" hidden></div>
+    <div id="cramLists"></div>
+  </section>
 
   <!-- COURSE -->
   <section id="start" role="tabpanel">
@@ -1091,7 +1133,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[data-prompt]')
 const tabs=[...document.querySelectorAll('nav.tabs button')];
 function showTab(id){tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));document.querySelectorAll('section[role=tabpanel]').forEach(s=>s.hidden=s.id!==id);try{localStorage.setItem('bd_tab',id)}catch(e){}}
 tabs.forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.tab);window.scrollTo({top:0})}));
-(function(){let h=(location.hash||'').slice(1),t=null;try{t=localStorage.getItem('bd_tab')}catch(e){}const ok=x=>tabs.some(b=>b.dataset.tab===x);showTab(ok(h)?h:'start')})();
+(function(){let h=(location.hash||'').slice(1),t=null;try{t=localStorage.getItem('bd_tab')}catch(e){}const ok=x=>tabs.some(b=>b.dataset.tab===x);showTab(ok(h)?h:'cram')})();
 /* ---------- concept map ---------- */
 (function(){
 const N=[
@@ -1527,6 +1569,7 @@ function inlineQ(host, q, onDone) {
   };
 }
 
+window.inlineQ = inlineQ;
 function runQuiz(host, qs) {
   if (!qs.length) { host.innerHTML = ''; return; }
   let i = 0, right = 0;
@@ -1670,6 +1713,201 @@ document.addEventListener('keydown',e=>{const t=e.target;if(t&&t.closest&&t.clos
  if((e.key==='n'||e.key==='N')&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&pending){e.preventDefault();doSave()}
  if(e.key==='Escape'&&!panel.hidden)close()});
 render();
+})();
+window.CRAM = {
+tf: [
+ ["HDFS achieves fault tolerance by replicating each data block on multiple DataNodes.", true, "Past exam"],
+ ["In HDFS, the DataNode stores metadata while the actual data blocks are stored on NameNodes.", false, "Reversed: NameNode = metadata, DataNode = blocks. Past exam"],
+ ["In YARN, the ResourceManager is responsible for allocating cluster resources among applications.", true, "Past exam"],
+ ["MapReduce adopts a PULL scheduling strategy rather than a push one.", true, "Workers ask for work with heartbeats. Past exam"],
+ ["MapReduce adopts a PUSH scheduling strategy rather than a pull one.", false, "Opposite wording of the same question. Past exam"],
+ ["HDFS replication is a mechanism to achieve fault tolerance by duplicating blocks across DataNodes.", true, "Pop quiz"],
+ ["Latency measures the time to produce a result after a request.", true, "Pop quiz"],
+ ["Intermediate (map) output is stored in HDFS.", false, "Stored on the mapper's LOCAL disk"],
+ ["The Secondary NameNode takes over when the NameNode fails.", false, "It only does checkpoints. It is not a backup"],
+ ["The default HDFS block size in Hadoop 2 is 128 MB.", true, "64 MB was Hadoop 1"],
+ ["The default HDFS replication factor is 3.", true, ""],
+ ["HDFS is well suited for low-latency reads and many small files.", false, "Built for large files and high throughput"],
+ ["HDFS follows a write-once, read-many model.", true, "You can append, not edit in place"],
+ ["The NameNode stores the actual file data.", false, "Only metadata. Data never passes through it"],
+ ["Hadoop is designed as a master-slave, shared-nothing architecture.", true, "Past exam"],
+ ["Hadoop relies on a small number of powerful, expensive machines.", false, "Many cheap commodity machines (scale-out)"],
+ ["Scale-up means adding more machines to the cluster.", false, "That is scale-out. Scale-up = bigger single machine"],
+ ["Each input split is processed by exactly one map task.", true, "1 split = 1 map task (usually 1 split = 1 block)"],
+ ["Shuffle and sort groups all values with the same key before reduce.", true, ""],
+ ["The shuffle randomly distributes data across reducers.", false, "Same key always goes to the same reducer: hash(key) % R"],
+ ["In Hadoop 1.x, the JobTracker scheduled and monitored MapReduce tasks.", true, ""],
+ ["In YARN, the NodeManager launches and monitors containers on its node.", true, ""],
+ ["There is one ApplicationMaster for the whole cluster.", false, "One ApplicationMaster PER application"],
+ ["A YARN container is a unit of allocated CPU and memory.", true, ""],
+ ["YARN only supports MapReduce jobs.", false, "Also Spark, Tez and others. Only MapReduce was Hadoop 1"],
+ ["DataNodes send a heartbeat to the NameNode every 3 seconds.", true, "Block report every 6 hours"],
+ ["When a map worker fails, its completed map tasks must also be re-run.", true, "Their output was on the dead node's local disk"],
+ ["Two replicas of the same block may be stored on the same DataNode.", false, "Never on the same node"],
+ ["The second replica is placed on a different rack than the first.", true, "Third: another node in that same second rack"],
+ ["The edits log records small incremental changes such as a rename.", true, "fsimage = snapshot"],
+ ["Speculative execution runs a backup copy of a slow (straggler) task.", true, "First copy to finish wins"],
+ ["A combiner can be used directly to compute averages.", false, "Average of averages is wrong; send (sum, count)"],
+ ["A combiner reduces the amount of data sent during the shuffle.", true, ""],
+ ["Velocity means data is produced slowly and analyzed later.", false, "Velocity = speed"],
+ ["Value refers to the total storage capacity of a system.", false, "Value = usefulness of the data"],
+ ["HBase is best for fast random reads and writes of individual records.", true, "Shown in class"],
+ ["PySpark replaces Spark.", false, "PySpark is the Python API for Spark. Shown in class"],
+ ["Solr is built using Lucene.", true, "Shown in class"],
+ ["A 129 MB file is stored as 2 HDFS blocks (Hadoop 2).", true, "128 + 1 MB"],
+ ["The NameNode is a single point of failure in Hadoop 1.", true, "Fixed in Hadoop 2 with HA (Active + Standby)"]
+],
+mcq: [
+ ["Where are the intermediate outputs of Map tasks stored?", "On the local disks of the mapper nodes", "Past exam"],
+ ["A 129 MB file in Hadoop 2.0 is divided into how many blocks?", "2", "Past exam"],
+ ["A 130 MB file: how many blocks?", "2", "Fall 2024"],
+ ["A 266 MB file: how many blocks?", "3 (128 + 128 + 10)", "Fall 2024"],
+ ["A 512 MB file with 128 MB blocks: how many blocks?", "4", "Spring exam"],
+ ["Which YARN component runs containers and monitors their resource usage on each node?", "NodeManager", "Past exam"],
+ ["Purpose of the shuffle and sort phase?", "To group all intermediate values with the same key together before reduction", "Past exam"],
+ ["In Hadoop 1.x, which component scheduled and monitored MapReduce tasks?", "JobTracker", "Past exam"],
+ ["What does a container represent in YARN?", "A unit of computation with allocated CPU and memory", "Past exam"],
+ ["Key responsibility of the ApplicationMaster?", "Negotiating containers with the ResourceManager and monitoring task execution", "Past exam"],
+ ["Which component of YARN is responsible for job scheduling?", "ResourceManager", "Fall 2024"],
+ ["Purpose of the Reduce function?", "Processing and aggregating the output of the Map phase", "Fall 2024"],
+ ["Locating stragglers and running redundant copies that commit first is called:", "Speculative execution", "Fall 2024, both versions"],
+ ["What happens in case of a map worker failure?", "Map tasks completed or in progress at that worker are reset to idle (re-run)", "Fall 2024, both versions"],
+ ["What happens when a DataNode becomes unavailable?", "Data is automatically replicated to another DataNode", "Fall 2024"],
+ ["Correct statement about latency and throughput?", "Latency = speed of response; throughput = how much data processed per unit of time", "Fall 2024"],
+ ["Which statement characterizes MapReduce input data in Hadoop?", "It is divided into splits that map tasks process", "Pop quiz"],
+ ["Primary role of the Reducer?", "Aggregate and summarize intermediate key-value pairs", "Pop quiz"],
+ ["Which component stores actual HDFS file blocks?", "DataNode", "Shown in class"],
+ ["Which tool is best for fast random reads and writes of individual records?", "HBase", "Shown in class"],
+ ["Relationship between PySpark and Spark?", "PySpark is the Python API for Spark", "Shown in class"],
+ ["Which service schedules a multi-step Hadoop workflow?", "Oozie", "Shown in class"],
+ ["Which statement about Solr and Lucene is correct?", "Solr is built using Lucene", "Shown in class"],
+ ["Which component holds the HDFS namespace and block locations?", "NameNode", ""],
+ ["Who receives an ApplicationMaster's request for containers?", "ResourceManager", "Spring exam"],
+ ["Who decides on which nodes the containers run?", "The ResourceManager's Scheduler", "Spring exam"],
+ ["Who actually launches the containers?", "NodeManager", "Spring exam"],
+ ["The node running the ApplicationMaster fails. Who handles it?", "ResourceManager (restarts the AM on another node)", "Spring exam"],
+ ["A worker node fails during map tasks. Who restarts the tasks?", "ApplicationMaster (on other healthy nodes)", "Spring exam"],
+ ["How is a node failure detected?", "Missed heartbeats", ""],
+ ["Block 1 is on Node 2 and Node 3. Where should its map task run?", "Node 2 (or Node 3): a node that has the data (data locality)", "Spring exam"],
+ ["Which partition function picks the reducer?", "hash(key) % number_of_reducers", ""],
+ ["Which scheduler gives each team/queue a guaranteed percentage of the cluster?", "Capacity Scheduler", ""],
+ ["Which scheduler gives all running jobs an equal share over time?", "Fair Scheduler", ""],
+ ["Which scheduler runs jobs strictly in arrival order?", "FIFO", ""],
+ ["DRF (Dominant Resource Fairness) equalizes what?", "Each user's share of their dominant (most-needed) resource", ""],
+ ["Which tool lets you write SQL queries on Hadoop data?", "Hive", ""],
+ ["Pig scripts are written in:", "Pig Latin", ""],
+ ["Which tool coordinates servers and handles NameNode failover?", "ZooKeeper", ""],
+ ["Which tool imports data from relational (SQL) databases into Hadoop?", "Sqoop", ""],
+ ["Which tool collects streaming log data into Hadoop?", "Flume", ""],
+ ["Which analytics type answers 'What will happen?'", "Predictive", "Lecture 2"],
+ ["Sensors stream readings every second and you must react in milliseconds. Which V?", "Velocity", "Lecture 2"],
+ ["Default replication factor in HDFS?", "3", ""]
+],
+fill: [
+ ["The ______ holds the filesystem namespace and the mapping of blocks to DataNodes.", "NameNode", "Pop quiz"],
+ ["In HDFS, a ______ is the basic unit of storage that is replicated across DataNodes.", "block", "Pop quiz"],
+ ["A ______ metric describes the rate at which data is processed and moved through a system.", "throughput", "Pop quiz"],
+ ["______ is the time it takes to produce a result after a request.", "Latency", ""],
+ ["The default HDFS block size in Hadoop 2 is ______ MB.", "128", ""],
+ ["The default replication factor in HDFS is ______.", "3", ""],
+ ["DataNodes send a ______ to the NameNode every 3 seconds to show they are alive.", "heartbeat", ""],
+ ["The ______ stores the actual data blocks in HDFS.", "DataNode", ""],
+ ["In YARN, the ______ launches containers on each node.", "NodeManager", ""],
+ ["In YARN, the ______ allocates resources across the whole cluster.", "ResourceManager", ""],
+ ["Each application in YARN has its own ______.", "ApplicationMaster", ""],
+ ["In Hadoop 1, the master that scheduled tasks was the ______; the workers were TaskTrackers.", "JobTracker", ""],
+ ["A ______ is a mini-reducer that runs on the mapper side to reduce network traffic.", "combiner", ""],
+ ["Running a map task on the node that already holds its block is called data ______.", "locality", ""],
+ ["Merging the fsimage with the edit log into a new fsimage is called ______.", "checkpointing", ""],
+ ["The snapshot of the NameNode metadata is the ______; the log of recent changes is the edits file.", "fsimage", ""],
+ ["The phase that groups intermediate pairs by key is called shuffle and ______.", "sort", ""],
+ ["Hadoop grows by adding more cheap machines; this is called scale-______.", "out", ""],
+ ["Each node having its own CPU, memory and disk is called a shared-______ architecture.", "nothing", ""],
+ ["Writing a block goes client to DataNode 1 to DataNode 2 to DataNode 3; this chain is the ______.", "pipeline", ""],
+ ["A unit of CPU and memory allocated by YARN is a ______.", "container", ""],
+ ["Running a backup copy of a slow task is called ______ execution.", "speculative", ""],
+ ["Workers ask the master for tasks, so MapReduce uses ______ scheduling.", "pull", ""],
+ ["The five Vs: Volume, Velocity, Variety, Veracity and ______.", "Value", ""],
+ ["CSV and XML are examples of ______-structured data.", "semi", "Fall 2024"],
+ ["Defining the table structure before loading data is schema-on-______.", "write", ""],
+ ["Storing raw data and applying structure only when reading is schema-on-______.", "read", ""],
+ ["HBase is a NoSQL database that stores its data on ______.", "HDFS", ""],
+ ["The Python API for Spark is called ______.", "PySpark", "Shown in class"],
+ ["The Hadoop workflow scheduler is ______.", "Oozie", "Shown in class"]
+],
+match: [
+ ["Hadoop components to their function", [["Metadata management and namespace operations","NameNode"],["Stores actual data blocks","DataNode"],["Parallel data processing framework","MapReduce"],["Distributed storage system","HDFS"],["Cluster resource management","YARN"]], "Pop quiz"],
+ ["Data concepts to definitions", [["Amount of data","Volume"],["Speed of data generation and processing","Velocity"],["Diversity of data types and sources","Variety"],["Trustworthiness of data","Veracity"],["Usefulness of data","Value"],["Time to produce a result after a request","Latency"]], "Pop quiz"],
+ ["Roles to their focus", [["Predict and explain with models","Data Scientist"],["Build the data foundation (pipelines)","Data Engineer"],["Explain the past with data","Data Analyst"],["Put models into production at scale","ML Engineer"]], "Pop quiz"],
+ ["YARN parts to their job", [["Allocates resources for the whole cluster","ResourceManager"],["Launches containers on one node","NodeManager"],["Manages one application's tasks","ApplicationMaster"],["Bundle of CPU + memory","Container"]], ""],
+ ["Hadoop 1 to Hadoop 2 (YARN)", [["JobTracker","ResourceManager + ApplicationMaster"],["TaskTracker","NodeManager"],["Fixed map/reduce slots","Containers"]], ""],
+ ["Ecosystem tools", [["NoSQL database on HDFS, fast row lookups","HBase"],["SQL on Hadoop","Hive"],["Scripting language (Pig Latin)","Pig"],["Coordination and failover","ZooKeeper"],["Workflow scheduler","Oozie"],["SQL database import/export","Sqoop"],["Collect streaming logs","Flume"],["Search library","Lucene"]], ""],
+ ["Analytics types to questions", [["What happened?","Descriptive"],["Why did it happen?","Diagnostic"],["What will happen?","Predictive"],["What should we do?","Prescriptive"]], ""],
+ ["Schedulers", [["Jobs run in arrival order","FIFO"],["Queues with guaranteed percentages","Capacity"],["Equal share for all running jobs","Fair"],["Equal share of each user's most-needed resource","DRF"]], ""],
+ ["Data types", [["Tables with fixed columns","Structured"],["CSV, XML, JSON","Semi-structured"],["Images, audio, video, free text","Unstructured"]], ""],
+ ["MapReduce phases", [["Emits (key, value) pairs from each split","Map"],["Groups values by key across mappers","Shuffle and sort"],["Aggregates each key's list of values","Reduce"],["Pre-aggregates on the mapper side","Combiner"]], ""]
+],
+open: [
+ ["Explain checkpointing and its purpose.", "The NameNode keeps an fsimage (snapshot of the metadata) and an edit log (every change since). Checkpointing periodically merges the two into a new fsimage and empties the edit log. It is done by the Secondary NameNode (Hadoop 1) or Standby NameNode (Hadoop 2). Purpose: keep the edit log small so the NameNode restarts quickly and always has a recent copy of the metadata.", "Fall 25"],
+ ["What does it mean that Hadoop is scale-out rather than scale-up? How does it improve scalability and reliability?", "Scale-up = make one machine bigger (more CPU, RAM, disk). Scale-out = add more cheap commodity machines to the cluster. Hadoop scales out with a shared-nothing design. Scalability: just add nodes, no hardware ceiling, lower cost. Reliability: no single machine matters; blocks are replicated and failed tasks re-run on other nodes.", "Fall 25"],
+ ["How does a Combiner improve the performance of a MapReduce job?", "A combiner is a mini-reducer that runs on each mapper's node before the shuffle. It pre-aggregates the mapper's output, e.g. (H1,12),(H1,7),(H1,9) becomes (H1,28). Fewer pairs are written to disk and sent over the network, so the job is faster. It works for operations like sum, count and max (commutative and associative); for an average send (sum, count).", "Fall 25 + Fall 2024"],
+ ["Describe how YARN splits the JobTracker of Hadoop 1.x into two separate processes.", "In Hadoop 1, the JobTracker did both resource management and per-job task management, so it was a bottleneck and single point of failure. YARN gives resource management to one global ResourceManager and job management to one ApplicationMaster per application. The AM asks the RM for containers, launches and monitors its tasks, and restarts failed ones. NodeManagers replace TaskTrackers and launch containers.", "Fall 2024, both versions"],
+ ["Why is HDFS fault tolerant and how does it realize fault tolerance?", "Cheap machines fail often, so HDFS expects failures. Every block is replicated (3 copies, one on another rack). DataNodes send heartbeats every 3 s and block reports. If heartbeats stop, the NameNode marks the node dead and re-copies its blocks from other replicas. Metadata is protected by fsimage + edit log and a Secondary/Standby NameNode.", "Fall 2024"],
+ ["'Bring computation close to the data': what does it mean and how does Hadoop realize it?", "Big data is too large to move across the network, so Hadoop sends the small program to the machines that store the data. HDFS spreads blocks over DataNodes and the NameNode knows where each block is. The scheduler runs each map task on a node holding its block (data locality); if busy, on the same rack. This saves bandwidth and time.", "Fall 2024, both versions"],
+ ["What schedulers exist in YARN? Compare them.", "FIFO, Capacity and Fair. FIFO runs jobs in arrival order: simple, but big jobs block small ones. Capacity splits the cluster into queues with guaranteed percentages, FIFO inside each queue. Fair gives every running job an equal share over time, so small jobs finish fast. (DRF = fairness on each user's dominant resource.)", "Fall 2024"],
+ ["Write a MapReduce job (pseudocode + key-value pairs) that sums a value per key, e.g. total patients per hospital.", "map(offset, line): if header line: hospital = HospitalID; else emit(hospital, patients).\nreduce(hospital, values): emit(hospital, sum(values)).\nPairs: (offset, line) -> (H1, 12) -> after shuffle (H1, [12, 7, 9]) -> (H1, 28).", "Fall 25"],
+ ["Write a MapReduce job for the maximum value per key (e.g. max cargo weight per ship).", "map: skip the 'PortId : Date' header; split each line on ':'; emit(ShipID, weight).\nreduce(ShipID, weights): emit(ShipID, max(weights)).\nPairs: (offset, line) -> (S1, 500) -> (S1, [500, 800, 400]) -> (S1, 800). Combiner = same as reducer.", "Fall 2024"],
+ ["Write a MapReduce job for an average per key (e.g. student GPA).", "map: skip the class header; emit(student#, grade).\nreduce(student#, grades): emit(student#, sum / count).\nExample: 101 -> [8, 6, 9] -> 23 / 3 = 7.67. With a combiner: emit (grade, 1), combine to (sum, count), divide only in the reducer.", "Fall 2024"],
+ ["How does Big Data Analytics help organizations? Give an industry example.", "It turns large, fast, varied data into insight so decisions are data-driven instead of based on gut feeling: finding patterns, predicting behaviour, personalising, detecting fraud, optimising operations. Example: banks analyse card transactions in real time to detect fraud; retailers like Amazon recommend products from purchase history.", "Fall 25"],
+ ["A file's 4 blocks are each on only one DataNode. Why is it not fault-tolerant, and how do you fix it?", "If any one DataNode fails, its block is lost and the file is broken. Fix: replicate each block on several DataNodes (factor 3, or 2), never two copies on the same node, e.g. DN1 {B1,B4}, DN2 {B2,B1}, DN3 {B3,B2}, DN4 {B4,B3}. Concept: block replication.", "Spring exam"],
+ ["Which qualities should a file system have to be suitable for Big Data? Give 3.", "Scalability (grow by adding nodes); fault tolerance (replication + automatic recovery); high throughput on large files (big blocks); data locality; runs on commodity hardware with write-once-read-many.", "Fall 2024"],
+ ["YARN: the node with the ApplicationMaster fails; then a worker node fails. What happens in each case?", "AM node fails: the ResourceManager notices (heartbeats stop) and restarts the AM in a new container on another node. Worker node fails: detected by missed heartbeats; the ApplicationMaster re-runs its tasks in new containers on healthy nodes, preferably ones holding the data.", "Spring exam"]
+],
+bonus: [
+ ["MapReduce trace: map (word, length), 3 reducers, hash % 3. Can you do one in 15 minutes?", "Practice in the MapReduce lab tab: blocks, replicas, failed node, map output, partitions, shuffle, reduce."],
+ ["DRF: cluster 1 TB memory, 100 cores. Alice's container 30 GB + 2 cores, Bob's 10 GB + 6 cores. How many each?", "Alice 20 containers (60% memory), Bob 10 containers (60% CPU). Equal dominant shares of 60%."],
+ ["A 700 MB file with replication 3: blocks and total copies?", "6 blocks (700 / 128 = 5.47, round up); 18 copies."],
+ ["Where do the 3 replicas go (rack awareness)?", "1st on the writer's node (rack A); 2nd on a node in another rack B; 3rd on another node in rack B."]
+]
+};
+
+/* ---------- exam cram ---------- */
+(function(){
+const C=window.CRAM, lists=document.getElementById('cramLists');
+const SECS=[['tf','True / False','4 on the exam'],['mcq','Multiple choice','9 on the exam'],['fill','Fill in the blank','4 on the exam'],['match','Matching','1 on the exam'],['open','Open-ended','2 on the exam'],['bonus','Bonus candidates','1 bonus']];
+const src=x=>x?`<span class="src">${esc(x)}</span>`:'';
+function rows(k){const a=C[k];
+ if(k==='tf')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2]&&/Past|Pop|class|Fall|Spring/.test(r[2])?r[2].split('.').pop().trim():'')}</div><div class="ca ${r[1]?'T':'F'}">${r[1]?'TRUE':'FALSE'}${r[2]&&!/^(Past exam|Pop quiz|Shown in class)$/.test(r[2])?' <span class="why2">· '+esc(r[2].replace(/\.? ?(Past exam|Pop quiz|Shown in class)$/,''))+'</span>':''}</div></div></div>`).join('');
+ if(k==='mcq')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2])}</div><div class="ca">${esc(r[1])}</div></div></div>`).join('');
+ if(k==='fill')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq">${esc(r[0])}${src(r[2])}</div><div class="ca">${esc(r[1])}</div></div></div>`).join('');
+ if(k==='match')return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq"><b>${esc(r[0])}</b>${src(r[2])}</div><div class="mtab">${r[1].map(p=>`<span>${esc(p[0])}</span><span>${esc(p[1])}</span>`).join('')}</div></div></div>`).join('');
+ return a.map((r,i)=>`<div class="crow"><span class="n">${i+1}</span><div><div class="cq"><b>${esc(r[0])}</b>${src(r[2])}</div><div class="ca" style="font-weight:400;color:var(--ink)">${esc(r[1])}</div></div></div>`).join('');}
+lists.innerHTML='<nav class="cramnav" aria-label="Formats">'+SECS.map(([k,t])=>`<a href="#c_${k}" data-jump="${k}">${t} · ${C[k].length}</a>`).join('')+'</nav>'+
+ SECS.map(([k,t,n])=>`<div class="cramsec" id="c_${k}"><div class="shead"><h3>${t}</h3><span class="mut">${n} · ${C[k].length} to learn</span></div>${rows(k)}</div>`).join('');
+lists.querySelectorAll('[data-jump]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById('c_'+a.dataset.jump).scrollIntoView({behavior:'smooth'})});
+const hb=document.getElementById('cramHide');
+hb.onclick=()=>{const on=!lists.classList.contains('hideans');lists.classList.toggle('hideans',on);hb.setAttribute('aria-pressed',on);hb.textContent=on?'Show all answers':'Hide answers (test yourself)';lists.querySelectorAll('.shown').forEach(x=>x.classList.remove('shown'))};
+lists.addEventListener('click',e=>{if(!lists.classList.contains('hideans'))return;const a=e.target.closest('.ca,.mtab');if(a)a.classList.toggle('shown')});
+/* flashcards */
+const fb=document.getElementById('cramFlash');let deck=[],fi=0,again=[];
+function card(k,r){if(k==='tf')return[r[0],r[1]?'TRUE':'FALSE'];if(k==='match')return['Match: '+r[0]+'\n'+r[1].map(p=>p[0]).join(' · '),r[1].map(p=>p[0]+' = '+p[1]).join('\n')];return[r[0],r[1]]}
+function startDeck(k){deck=shuffle(C[k].map(r=>card(k,r)));fi=0;again=[];showCard()}
+function showCard(flip){if(fi>=deck.length){if(again.length){deck=shuffle(again);again=[];fi=0}else{fb.innerHTML='<p><b>Deck done.</b> Pick another section or close.</p>'+pickRow();wirePick();return}}
+ const [q,a]=deck[fi];fb.innerHTML=`<div class="label">Card ${fi+1} of ${deck.length}${again.length?' · '+again.length+' to repeat':''}</div><div class="fcard"><div style="white-space:pre-line">${esc(q)}</div>${flip?`<div class="fa">${esc(a)}</div>`:''}</div><div class="row" style="justify-content:center">${flip?'<button class="btn" id="fAgain">Again</button><button class="btn primary" id="fKnew">I knew it</button>':'<button class="btn primary" id="fFlip">Show answer</button>'}<button class="btn" id="fClose">Close</button></div>`;
+ const g=id=>document.getElementById(id);if(g('fFlip'))g('fFlip').onclick=()=>showCard(true);if(g('fKnew'))g('fKnew').onclick=()=>{fi++;showCard()};if(g('fAgain'))g('fAgain').onclick=()=>{again.push(deck[fi]);fi++;showCard()};g('fClose').onclick=()=>{fb.hidden=true}}
+const pickRow=()=>'<div class="row" style="margin-top:10px">'+SECS.filter(s=>s[0]!=='bonus').map(([k,t])=>`<button class="btn" data-deck="${k}">${t}</button>`).join('')+'<button class="btn" id="fClose2">Close</button></div>';
+function wirePick(){fb.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>startDeck(b.dataset.deck));const c=document.getElementById('fClose2');if(c)c.onclick=()=>{fb.hidden=true}}
+document.getElementById('cramCards').onclick=()=>{document.getElementById('cramMockBox').hidden=true;fb.hidden=false;fb.innerHTML='<p><b>Which section?</b></p>'+pickRow();wirePick();fb.scrollIntoView({behavior:'smooth',block:'center'})};
+/* mock exam in the real format */
+const mb=document.getElementById('cramMockBox');
+function pick(t,n,ex){return shuffle(BANK.filter(q=>q.t===t&&!ex.has(q.id))).slice(0,n)}
+document.getElementById('cramMock').onclick=()=>{fb.hidden=true;const ex=new Set();const take=(t,n)=>{const r=pick(t,n,ex);r.forEach(q=>ex.add(q.id));return r};
+ const parts=[['True / False',take('tf',4)],['Multiple choice',take('mcq',9)],['Fill in the blank',take('fill',4)],['Matching',take('match',1)],['Open-ended',take('open',2)],['Bonus',take('multi',1)]];
+ const total=parts.reduce((a,p)=>a+p[1].length,0);let done=0,right=0;
+ mb.hidden=false;mb.innerHTML=`<div class="mockbar"><b>Mock exam</b><span class="score" id="mockScore">0 / ${total} answered</span><button class="btn" id="mockNew">New mock</button><button class="btn" id="mockClose">Close</button></div>`+parts.map(([t,qs])=>`<h3>${t} <span class="mut" style="font-size:14px">(${qs.length})</span></h3>`+qs.map((q,i)=>`<div class="panel mq" data-p="${t}" data-i="${i}" style="margin-bottom:10px"></div>`).join('')).join('');
+ parts.forEach(([t,qs])=>qs.forEach((q,i)=>{const host=mb.querySelector(`.mq[data-p="${t}"][data-i="${i}"]`);window.inlineQ(host,q,ok=>{done++;if(ok)right++;document.getElementById('mockScore').textContent=`${done} / ${total} answered · ${right} correct`+(done===total?` · ${Math.round(100*right/total)}%`:'')})}));
+ document.getElementById('mockNew').onclick=()=>document.getElementById('cramMock').click();document.getElementById('mockClose').onclick=()=>{mb.hidden=true};
+ mb.scrollIntoView({behavior:'smooth'})};
 })();
 </script>
 
